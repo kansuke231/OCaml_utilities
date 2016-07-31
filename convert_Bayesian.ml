@@ -30,7 +30,7 @@ let add_to_map adj_map str =
 	
 	let str_split = Str.split (Str.regexp "[ |,]+") str in 
 	if List.length str_split = 1 then 
-	(* Starting node *)
+	(* Only source node *)
 	(
 		let node = List.hd str_split in 
 		try let found = AdjList.find node adj_map in
@@ -40,19 +40,23 @@ let add_to_map adj_map str =
 	)
 	else
 	(
+
 		let srcs = List.tl str_split in
 		let dst = List.hd str_split in 
-		let rec add_multiple adj_map src_list = 
+		let rec add_multiple map src_list = 
 			match src_list with
-			| [] -> adj_map
+			| [] -> map
 			| h::t -> 
 				(
-					try let found = AdjList.find h adj_map in
-						AdjList.add h (found@[dst]) adj_map
+					try let found = AdjList.find h map in
+						let updated = AdjList.add h (found@[dst]) map in
+						add_multiple updated t
 					with
-					| _ -> AdjList.add h [] adj_map
+					| _ -> let updated = AdjList.add h [dst] map in add_multiple updated t
+
 				)
 		in
+	
 		add_multiple adj_map srcs
 	)
 
